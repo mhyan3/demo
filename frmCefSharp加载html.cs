@@ -29,36 +29,31 @@ namespace WindowsFormsApp3
             // 初始化 CefSharp  
             Cef.Initialize(settings);
 
-            // 创建并添加 CefSharp 浏览器控件  
-            browser = new ChromiumWebBrowser(Application.StartupPath + "\\TinyMce\\index.html");
-            //browser.BrowserSettings.Javascript = CefState.Enabled;
-            //browser.JavascriptObjectRepository.Settings.LegacyBindingEnabled = true;
-             
+       // 创建并添加 CefSharp 浏览器控件  
+browser = new ChromiumWebBrowser(System.Windows.Forms.Application.StartupPath + "\\TinyMce\\index.html");
+boundObject = new BoundObject();
+boundObject.form1 = this;
+browser.BrowserSettings.Javascript = CefState.Enabled;
+browser.Dock = DockStyle.Fill;
+
+browser.JavascriptObjectRepository.Settings.LegacyBindingEnabled = true;
+browser.JavascriptObjectRepository.Register("boundObject", boundObject, false, BindingOptions.DefaultBinder);//获取html上的text的值
+this.panel2.Controls.Add(browser);
 
 
-            this.panel1.Controls.Add(browser);
-            //boundObject = new BoundObject();
-            //boundObject.ParentRichTextBox = this.richTextBox1;
-            browser.Dock = DockStyle.Fill;
-            //browser.JavascriptObjectRepository.Register("boundObject", boundObject, false, BindingOptions.DefaultBinder);//获取html上的编辑器的值
-            // 处理浏览器加载完成事件
-            //  browser.FrameLoadEnd += Browser_FrameLoadEnd;
-
-
-            //// 加载网页完成后执行脚本
-            //browser.LoadingStateChanged += (sender, args) =>
-            //{
-            //    if (args.IsLoading == false)
-            //    {
-            //        // 执行 JavaScript 脚本给 div 传值
-            //        browser.ExecuteScriptAsync("document.getElementById('display-content').innerHTML = '<p>23223123234334</p><p>32245234</p><p>234452345</p>';");
-            //      //  browser.ExecuteScriptAsync($"editor.setData('<p>23223123234334</p><p>32245234</p><p>234452345</p>');");
-            //    }
-            //};
-        }
+browser.LoadingStateChanged += Browser_LoadingStateChanged;
+        } private async void Browser_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
+ {
+     if (!e.IsLoading)
+     {
+       
+            browser.ExecuteScriptAsync("LoadHtml(\"" + html + "\");");
+     }
+ }
         public class BoundObject
         {
             public RichTextBox ParentRichTextBox { get; set; }
+             public frmcs form1 { get; set; } 
             public void sendContentFromCKEditor(string content)
             {
                 if (ParentRichTextBox.InvokeRequired)
